@@ -1,4 +1,4 @@
-// Copyright NVIDIA Corporation 2013-2015
+// Copyright NVIDIA Corporation 2015
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
@@ -26,32 +26,35 @@
 
 #pragma once
 
-#include <dp/rix/gl/inc/ParameterCacheStream.h>
-#include <dp/rix/gl/inc/ParameterRendererBuffer.h>
+#include <driver_types.h>
+#include <dp/cuda/Config.h>
+#include <dp/cuda/Types.h>
+#include <dp/math/Vecnt.h>
 
 namespace dp
 {
-  namespace rix
+  namespace cuda
   {
-    namespace gl
+
+    class Device
     {
-
-      /************************************************************************/
-      /* ParameterRendererBufferDSA                                           */
-      /************************************************************************/
-      class ParameterRendererBufferDSA : public ParameterRendererBuffer
-      {
       public:
-        ParameterRendererBufferDSA( ParameterCacheEntryStreamBuffers const& parameterCacheEntries, dp::gl::BufferSharedPtr const& ubo, GLenum target
-                                  , size_t uboBinding, size_t uboOffset, GLsizeiptr uboBlockSize
-                                  , bool useUniformBufferUnifiedMemory);
+        DP_CUDA_API static DeviceSharedPtr create();
+        DP_CUDA_API virtual ~Device();
 
-        virtual void render( void const* cache );
-      };
+      public:
+        DP_CUDA_API dp::math::Vec3i getMaxThreadsDim() const;
+        DP_CUDA_API bool isCurrent() const;
+        DP_CUDA_API void synchronize();
 
-    } // namespace gl
-  } // namespace rix
+      protected:
+        DP_CUDA_API Device();
+        DP_CUDA_API int getDevice() const;
+
+      private:
+        int             m_device;
+        cudaDeviceProp  m_properties;
+    };
+
+  } // namespace cuda
 } // namespace dp
-
-
-

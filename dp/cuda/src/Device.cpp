@@ -1,4 +1,4 @@
-// Copyright NVIDIA Corporation 2013-2015
+// Copyright NVIDIA Corporation 2015
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions
 // are met:
@@ -24,34 +24,53 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#pragma once
-
-#include <dp/rix/gl/inc/ParameterCacheStream.h>
-#include <dp/rix/gl/inc/ParameterRendererBuffer.h>
+#include <dp/cuda/Device.h>
 
 namespace dp
 {
-  namespace rix
+  namespace cuda
   {
-    namespace gl
+    DeviceSharedPtr Device::create()
     {
+      return( std::shared_ptr<Device>( new Device() ) );
+    }
 
-      /************************************************************************/
-      /* ParameterRendererBufferDSA                                           */
-      /************************************************************************/
-      class ParameterRendererBufferDSA : public ParameterRendererBuffer
-      {
-      public:
-        ParameterRendererBufferDSA( ParameterCacheEntryStreamBuffers const& parameterCacheEntries, dp::gl::BufferSharedPtr const& ubo, GLenum target
-                                  , size_t uboBinding, size_t uboOffset, GLsizeiptr uboBlockSize
-                                  , bool useUniformBufferUnifiedMemory);
+    Device::Device()
+    {
+      CUDA_VERIFY( cudaGetDevice( &m_device ) );
+      CUDA_VERIFY( cudaGetDeviceProperties( &m_properties, m_device ) );
+    }
 
-        virtual void render( void const* cache );
-      };
+    Device::~Device( )
+    {
+      DP_ASSERT( isCurrent() );
+      CUDA_VERIFY( cudaDeviceReset() );
+    }
 
-    } // namespace gl
-  } // namespace rix
+    dp::math::Vec3i Device::getMaxThreadsDim() const
+    {
+      DP_ASSERT( isCurrent() );
+      return( dp::math::Vec3i( m_properties.maxThreadsDim[0], m_properties.maxThreadsDim[1], m_properties.maxThreadsDim[2] ) );
+    }
+
+    int Device::getDevice() const
+    {
+      DP_ASSERT( isCurrent() );
+      return( m_device );
+    }
+
+    bool Device::isCurrent() const
+    {
+      int dev;
+      CUDA_VERIFY( cudaGetDevice( &dev ) );
+      return( dev == m_device );
+    }
+
+    void Device::synchronize()
+    {
+      DP_ASSERT( isCurrent() );
+      cudaDeviceSynchronize();
+    }
+
+  } // namespace cuda
 } // namespace dp
-
-
-

@@ -37,6 +37,7 @@ namespace dp
     DEFINE_PTR_TYPES(Buffer);
     DEFINE_PTR_TYPES(Buffer3D);
     DEFINE_PTR_TYPES(BufferHost);
+    DEFINE_PTR_TYPES(Device);
     DEFINE_PTR_TYPES(Event);
     DEFINE_PTR_TYPES(GraphicsResource);
     DEFINE_PTR_TYPES(Stream);
